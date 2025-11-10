@@ -5,6 +5,7 @@ import datetime
 import json
 import shutil
 from io import BytesIO
+from dotenv import load_dotenv
 
 # Third-party libraries
 from flask import Flask, render_template, request, jsonify, send_from_directory
@@ -20,6 +21,8 @@ import requests
 # --- Global Configuration and Flask App Initialization ---
 
 app = Flask(__name__)
+load_dotenv()
+import google.generativeai as genai
 
 # Create an uploads folder if it doesn't exist
 UPLOAD_FOLDER = 'uploads'
@@ -78,6 +81,63 @@ def download_and_save_image(url, filename, upload_folder):
 
 def save_placeholder_image(filename):
     return download_and_save_image(url=None, filename=filename, upload_folder=app.config['UPLOAD_FOLDER'])
+
+# --- AI HELPER FUNCTION (GOOGLE API) ---
+
+def get_ai_generated_documentation(project_title):
+    """
+    Calls the Google Generative AI (Gemini) API to get documentation.
+    """
+    # 1. Configure the API key
+    try:
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            return {"error": "GOOGLE_API_KEY is not set. Please check your .env file."}
+        genai.configure(api_key=api_key)
+    except Exception as e:
+        return {"error": f"API configuration failed: {e}"}
+
+    # 2. Use updated model name + JSON output config
+    model = genai.GenerativeModel(
+    'gemini-pro',  # <-- Use this one
+    generation_config={"response_mime_type": "application/json"}
+)
+
+    # 3. Create the prompt
+    json_keys = DOCUMENTATION_TAGS 
+
+    system_prompt = f"""
+    You are an expert technical writer for student software projects.
+    You will be given a project title.
+    Your task is to generate documentation for this project.
+    You MUST return a single JSON object.
+    The keys in the JSON object MUST be exactly: {json_keys}
+    The value for each key should be a string containing the generated content for that section,
+    formatted with newlines (\n) where appropriate.
+    Do not include any other text, just the JSON object.
+    """
+
+    user_prompt = f"Project Title: {project_title}"
+    full_prompt = f"{system_prompt}\n\n{user_prompt}"
+
+    # 4. Call the API
+    try:
+        print(f"--- Calling Google API for: {project_title} ---")
+
+        response = model.generate_content(full_prompt)
+
+        # Gemini 1.5 returns text directly in response.text
+        content_json = json.loads(response.text)
+
+        print("--- Google API Success! ---")
+        return content_json
+
+    except Exception as e:
+        error_msg = f"ERROR: Google AI content generation failed: {e}"
+        print(error_msg)
+        if "API key" in str(e):
+            error_msg += "\n\nIs your GOOGLE_API_KEY correct and enabled in your Google Cloud project?"
+        return {"error": error_msg}
 
 
 # --- Document Editor Classes ---
@@ -644,6 +704,26 @@ def upload_and_update():
         "changes_log": changes_log,
         "output_path": output_path
     })
+@app.route('/generate_project_content', methods=['POST'])
+def generate_project_content():
+    """
+    This route is called by the new 'Generate with AI' button.
+    It gets the project title, calls the AI helper, and returns
+    the generated content as JSON.
+    """
+    project_title = request.json.get('project_title')
+    
+    if not project_title:
+        return jsonify({"error": "Project title is required."}), 400
+
+    # Call our new helper function
+    content_data = get_ai_generated_documentation(project_title)
+
+    if "error" in content_data:
+         return jsonify(content_data), 500
+
+    # Success! Send the JSON data back to the webpage
+    return jsonify(content_data)
 
 @app.route('/generate_diagrams', methods=['POST'])
 def generate_diagrams():

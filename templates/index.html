@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Project Document Editor</title>
-    <!-- CSS must be in the static folder for this to work -->
     <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
     
@@ -141,7 +140,6 @@
 
         <div class="container">
             <div class="form-section">
-                <!-- Template Selector -->
                 <label for="template_selector">Select Template:</label>
                 <select id="template_selector" name="template_file">
                     {% for config in template_configs %}
@@ -200,8 +198,6 @@
                     <label for="year">New Year (e.g., 2025-2026):</label>
                     <input type="text" id="year" name="year" value="{{ default_new_year }}" />
 
-                    <!-- TEMPORARILY DISABLED: AI DIAGRAM GENERATION FEATURE -->
-
                     <h2 style="margin-top: 30px">📄 Document Content Editor</h2>
 
                     <label for="doc_section_selector">Select Document Section to Edit:</label>
@@ -219,6 +215,10 @@
                         <option value="doc_software_req">11. Software Requirements</option>
                     </select>
 
+                    <button type="button" id="generate-doc-btn" class="btn btn-primary my-2" style="background-color: #28a745; margin-bottom: 10px;">
+                        🚀 Generate Documentation with AI
+                    </button>
+                    <div id="ai-status" class="form-text" style="margin-bottom: 20px; font-size: 0.9em;"></div>
                     <label for="content_editor">Content for Section:</label>
                     <textarea id="content_editor" name="doc_introduction" rows="10"
                         placeholder="Paste or edit the content for this section here."></textarea>
@@ -226,11 +226,9 @@
                         This text will replace the tag [[doc_introduction]] in the template.
                     </p>
                     
-                    <!-- NEW: CODE IMPLEMENTATION SECTION -->
                     <h2 style="margin-top: 30px;">💻 Code Implementation</h2>
                     
                     <div id="code_files_container">
-                        <!-- Code File 1 (Initial file structure) -->
                         <div class="code-entry" data-index="1">
                             <label for="code_filename_1">Code File Name 1 (e.g., app.py):</label>
                             <input type="text" id="code_filename_1" name="code_filename_1" placeholder="e.g., app.py" required />
@@ -241,19 +239,15 @@
                         </div>
                     </div>
 
-                    <!-- Button to add more code files -->
                     <button type="button" id="add_code_file_btn" style="background-color: #3f51b5; margin-bottom: 30px;">
                         ➕ Add Another Code File
                     </button>
 
-                    <!-- Hidden field to transmit all code content names/values (Populated by JS) -->
                     <input type="hidden" id="all_code_data" name="all_code_data" value="[]">
 
-                    <!-- NEW: SCREENSHOT SECTION -->
                     <h2 style="margin-top: 30px;">🖼 User Interface Screenshots</h2>
 
                     <div id="screenshot_files_container">
-                        <!-- Screenshot 1 (Initial file structure) -->
                         <div class="screenshot-entry" data-index="1">
                             <label for="screenshot_name_1">Screenshot Name 1 (e.g., Onboarding Screen):</label>
                             <input type="text" id="screenshot_name_1" name="screenshot_name_1" placeholder="e.g., Dashboard View" required />
@@ -264,11 +258,9 @@
                         </div>
                     </div>
 
-                    <!-- Button to add more screenshots -->
                     <button type="button" id="add_screenshot_btn" style="background-color: #008080; margin-bottom: 30px;">
                         ➕ Add Another Screenshot
                     </button>
-                    <!-- Hidden field to transmit all screenshot names/file_ids (Populated by JS) -->
                     <input type="hidden" id="all_screenshot_data" name="all_screenshot_data" value="[]">
 
 
@@ -395,10 +387,10 @@
                 
                 // CRITICAL: We pass the input name attribute as file_id for Flask to access request.files
                 if (nameInput && nameInput.value.trim() && fileInput) {
-                     screenshotData.push({ 
-                        name: nameInput.value, 
-                        file_id: fileInput.name 
-                    });
+                        screenshotData.push({ 
+                            name: nameInput.value, 
+                            file_id: fileInput.name 
+                        });
                 }
             });
             allScreenshotDataInput.value = JSON.stringify(screenshotData);
@@ -614,6 +606,84 @@
         textInputs.forEach((input) => {
             input.addEventListener("input", updatePreview);
         });
+    </script>
+    
+    <script>
+    document.getElementById('generate-doc-btn').addEventListener('click', function() {
+
+        // 1. Get the project title (This will now correctly find the one at the top)
+        const projectTitle = document.getElementById('project_title').value;
+        const statusEl = document.getElementById('ai-status');
+
+        if (!projectTitle) {
+            statusEl.innerHTML = '<span style="color: red;">Please enter a Project Title first.</span>';
+            return;
+        }
+
+        // 2. Show a loading message
+        statusEl.innerHTML = '<span style="color: blue;">Generating AI content... (This may take a moment)</span>';
+        this.disabled = true; // Disable button during request
+
+        // 3. Call the new Flask route
+        fetch('/generate_project_content', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ project_title: projectTitle })
+        })
+        .then(response => {
+            if (!response.ok) {
+                // This will catch the 500 error until you fix the API key
+                return response.json().then(err => { throw new Error(err.error); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            // 4. --- THIS IS THE CORRECTED LOGIC ---
+            // This list must match the DOCUMENTATION_TAGS in app.py
+            const tags = [
+                'doc_introduction', 'doc_objective', 'doc_scope', 'doc_techstack',
+                'doc_feasibility', 'doc_system_features', 'doc_modules', 'doc_usecase',
+                'doc_advantage', 'doc_hardware_req', 'doc_software_req'
+            ];
+
+            let fieldsFilled = 0;
+            tags.forEach(tag => {
+                if (data[tag]) {
+                    // Put the AI data directly into your JavaScript cache object
+                    docContentCache[tag] = data[tag]; 
+                    fieldsFilled++;
+                }
+            });
+
+            // Now, update the visible form to show the first piece of content
+            const firstTag = tags[0]; // 'doc_introduction'
+            if (docContentCache[firstTag]) {
+                docSectionSelector.value = firstTag;
+                contentEditor.value = docContentCache[firstTag];
+                contentEditor.name = firstTag;
+                editorInfoParagraph.textContent = `This text will replace the tag [[${firstTag}]] in the template.`;
+            }
+            
+            // Trigger a preview update
+            updatePreview();
+            
+            statusEl.innerHTML = `<span style="color: green;">Success! Filled ${fieldsFilled} fields. Please review the content.</span>`;
+            
+        })
+        .catch(error => {
+            console.error('AI Generation Error:', error);
+            statusEl.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+        })
+        .finally(() => {
+            this.disabled = false; // Re-enable the button
+        });
+    });
     </script>
 </body>
 
