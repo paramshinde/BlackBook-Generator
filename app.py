@@ -99,7 +99,7 @@ def get_ai_generated_documentation(project_title):
 
     # 2. Use updated model name + JSON output config
     model = genai.GenerativeModel(
-    'gemini-pro',  # <-- Use this one
+    'gemini-2.5-pro',  # <-- Use this one
     generation_config={"response_mime_type": "application/json"}
 )
 
