@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Document Editor</title>
+    <style>
+        /* CSS to make the page fill the entire screen */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px; /* Constrain content width for readability on large screens */
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            gap: 40px;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .form-section, .preview-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .details-section {
+            background-color: #e9e9e9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .details-section p {
+            margin: 5px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #toggle-preview-btn {
+            background-color: #6c757d;
+        }
+        #toggle-preview-btn:hover {
+            background-color: #5a6268;
+        }
+        .preview-content {
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 6px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <h1>📄 Project Document Update Tool</h1>
+        
+        <div class="container">
+            <div class="form-section">
+                <div class="details-section">
+                    <h2>Current Template Details</h2>
+                    <p><strong>Student Name:</strong> {{ old_details['student_name'] }}</p>
+                    <p><strong>Project Title:</strong> {{ old_details['project_title'] }}</p>
+                    <p><strong>Professor Name:</strong> {{ old_details['professor_name'] }}</p>
+                    <p><strong>Guide Name:</strong> {{ old_details['guide_name'] }}</p>
+                    <p><strong>Year:</strong> {{ old_details['year'] }}</p>
+                </div>
+                
+                <h2>Enter New Details</h2>
+                <form id="mainForm" action="/upload_and_update" method="post" enctype="multipart/form-data">
+                    <label for="student_name">New Student Name:</label>
+                    <input type="text" id="student_name" name="student_name" placeholder="Leave blank to keep current">
+                    
+                    <label for="project_title">New Project Title:</label>
+                    <input type="text" id="project_title" name="project_title" placeholder="Leave blank to keep current">
+                    
+                    <label for="professor_name">New Professor Name:</label>
+                    <input type="text" id="professor_name" name="professor_name" placeholder="Leave blank to keep current">
+                    
+                    <label for="guide_name">New Guide Name:</label>
+                    <input type="text" id="guide_name" name="guide_name" placeholder="Leave blank to keep current">
+                    
+                    <label for="year">New Year (e.g., 2025-2026):</label>
+                    <input type="text" id="year" name="year" value="{{ default_year }}">
+                    
+                    <h3>Upload Project Images</h3>
+                    <p style="font-size: 0.9em; color: #666;">Select the corresponding image files for each section.</p>
+                    
+                    <label for="plagarism_report">Plagiarism Report:</label>
+                    <input type="file" id="plagarism_report" name="plagarism_report" accept="image/*">
+
+                    <label for="er_diagram">ER Diagram:</label>
+                    <input type="file" id="er_diagram" name="er_diagram" accept="image/*">
+
+                    <label for="class_diagram">Class Diagram:</label>
+                    <input type="file" id="class_diagram" name="class_diagram" accept="image/*">
+                    
+                    <label for="activity_diagram">Activity Diagram:</label>
+                    <input type="file" id="activity_diagram" name="activity_diagram" accept="image/*">
+                    
+                    <label for="usecase_diagram">Use Case Diagram:</label>
+                    <input type="file" id="usecase_diagram" name="usecase_diagram" accept="image/*">
+
+                    <label for="sequence_diagram">Sequence Diagram:</label>
+                    <input type="file" id="sequence_diagram" name="sequence_diagram" accept="image/*">
+                    
+                    <label for="component_diagram">Component Diagram:</label>
+                    <input type="file" id="component_diagram" name="component_diagram" accept="image/*">
+                    
+                    <label for="deployment_diagram">Deployment Diagram:</label>
+                    <input type="file" id="deployment_diagram" name="deployment_diagram" accept="image/*">
+                    
+                    <label for="database_model">Database Model:</label>
+                    <input type="file" id="database_model" name="database_model" accept="image/*">
+
+                    <div class="button-group">
+                        <button type="submit">Update Document & Upload Images</button>
+                        <button type="button" id="toggle-preview-btn">Hide Preview</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="preview-section">
+                <h2>Live Preview</h2>
+                <div id="preview-content" class="preview-content">
+                    Loading preview...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainForm = document.getElementById('mainForm');
+        const previewSection = document.querySelector('.preview-section');
+        const previewContent = document.getElementById('preview-content');
+        const toggleBtn = document.getElementById('toggle-preview-btn');
+
+        async function updatePreview() {
+            const formData = new FormData(mainForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/preview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    previewContent.innerHTML = result.html;
+                } else {
+                    previewContent.innerText = 'Error loading preview: ' + result.error;
+                }
+            } catch (error) {
+                previewContent.innerText = 'Network error: Unable to connect to server.';
+            }
+        }
+
+        // Toggle button functionality
+        toggleBtn.addEventListener('click', () => {
+            previewSection.classList.toggle('hidden');
+            if (previewSection.classList.contains('hidden')) {
+                toggleBtn.innerText = 'Show Preview';
+            } else {
+                toggleBtn.innerText = 'Hide Preview';
+            }
+        });
+        
+        // Add event listeners to all input fields for live preview
+        const textInputs = mainForm.querySelectorAll('input[type="text"]');
+        textInputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Initial preview load
+        updatePreview();
+    </script>
+</body>
+</html>

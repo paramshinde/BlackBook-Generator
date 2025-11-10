@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .log-list {
+            text-align: left;
+            margin-top: 20px;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+        .log-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .log-list li {
+            background-color: #e9e9e9;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if no_changes %}
+            <h1>🤔 No Changes Made</h1>
+            <p>You did not enter any new information. The document was not modified.</p>
+        {% else %}
+            <h1>✅ DOCUMENT UPDATE COMPLETE!</h1>
+            <p><strong>Total Replacements:</strong> {{ replacements }}</p>
+            <p><strong>Saved as:</strong> {{ output_path }}</p>
+            
+            <div class="log-list">
+                <h2>📋 Change Log:</h2>
+                <ul>
+                    {% for log in log_messages %}
+                        <li>{{ log }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

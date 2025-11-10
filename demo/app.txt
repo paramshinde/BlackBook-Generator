@@ -1,0 +1,398 @@
+from flask import Flask, render_template, request, jsonify, send_from_directory
+from docx import Document
+import re
+import os
+from docx.oxml.ns import qn
+import datetime
+from io import BytesIO
+import time
+from docx.shared import Inches,Length
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.text.paragraph import Paragraph # CRUCIAL NEW IMPORT
+
+# --- Your existing ProjectDocumentEditor class ---
+class ProjectDocumentEditor:
+    def __init__(self, doc_path):
+        self.doc_path = doc_path
+        self.replacements = 0
+        self.changes_log = []
+    
+    def process_document(self, old_data_dict, new_data_dict, uploaded_images=None):
+        # Create a document object from a temporary copy of the template
+        with open(self.doc_path, 'rb') as docx_file:
+            self.doc = Document(docx_file)
+
+        # Replace text fields first
+        for field_type, old_value in old_data_dict.items():
+            if old_value and new_data_dict.get(field_type):
+                new_value = new_data_dict[field_type]
+                self._replace_text_globally(old_value, new_value, field_type)
+        
+        # Now replace images if they were uploaded
+        if uploaded_images:
+            self._replace_images(uploaded_images)
+
+        return self.doc, self.replacements, self.changes_log
+
+    def replace_project_details(self, old_data_dict, new_data_dict, uploaded_images=None, output_path=None):
+        if output_path is None:
+            base_name = os.path.splitext(self.doc_path)[0]
+            output_path = f"{base_name}_COMPLETE_UPDATE.docx"
+        
+        doc, replacements, changes_log = self.process_document(old_data_dict, new_data_dict, uploaded_images)
+        doc.save(output_path)
+        return replacements, changes_log, output_path
+
+    def get_document_as_text(self, old_data_dict, new_data_dict):
+        # This method is for live preview and should not replace images
+        doc, _, _ = self.process_document(old_data_dict, new_data_dict)
+        return "\n".join([p.text for p in doc.paragraphs])
+    
+    def _replace_text_globally(self, old_text, new_text, field_type):
+        for i, paragraph in enumerate(self.doc.paragraphs):
+            if paragraph.text.strip():
+                self._smart_replace_with_formatting(paragraph, old_text, new_text, f"paragraph_{i+1}", field_type)
+        
+        for table_idx, table in enumerate(self.doc.tables):
+            for row_idx, row in enumerate(table.rows):
+                for cell_idx, cell in enumerate(row.cells):
+                    for para_idx, paragraph in enumerate(cell.paragraphs):
+                        if paragraph.text.strip():
+                            location = f"table_{table_idx+1}.cell_{cell_idx+1}.para_{para_idx+1}"
+                            self._smart_replace_with_formatting(paragraph, old_text, new_text, location, field_type)
+        
+        for section_idx, section in enumerate(self.doc.sections):
+            if section.header is not None:
+                for para_idx, paragraph in enumerate(section.header.paragraphs):
+                    if paragraph.text.strip():
+                        location = f"header_section_{section_idx+1}.para_{para_idx+1}"
+                        self._smart_replace_with_formatting(paragraph, old_text, new_text, location, field_type)
+            
+            if section.footer is not None:
+                for para_idx, paragraph in enumerate(section.footer.paragraphs):
+                    if paragraph.text.strip():
+                        location = f"footer_section_{section_idx+1}.para_{para_idx+1}"
+                        self._smart_replace_with_formatting(paragraph, old_text, new_text, location, field_type)
+    
+    # ... inside the ProjectDocumentEditor class ...
+
+   # ... inside the ProjectDocumentEditor class ...
+
+    # ... inside the ProjectDocumentEditor class ...
+
+    def _replace_images(self, uploaded_images):
+        from docx.shared import Inches, Length
+        from docx.text.paragraph import Paragraph
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from PIL import Image # Ensure this is imported at the top of app.py
+        
+        # --- 1. Calculate Usable Page Height (The "Smart Collapse" Logic) ---
+        
+        # Get the first section's layout properties (assuming uniform layout)
+        section = self.doc.sections[0]
+        
+        # Access the raw internal values (in EMU) and perform arithmetic
+        # .emu is needed because .page_height, .top_margin, etc., are Length objects.
+        page_height_emu = section.page_height.emu
+        margin_top_emu = section.top_margin.emu
+        margin_bottom_emu = section.bottom_margin.emu
+        
+        # Calculate usable space (This result is an integer in EMU)
+        usable_height_emu_value = page_height_emu - margin_top_emu - margin_bottom_emu
+        
+        # CRITICAL FIX: Convert the final EMU value back into a Length object 
+        # before accessing the .inches property.
+        usable_height_inches = Length(usable_height_emu_value).inches
+        
+        # Set a SAFE MAXIMUM HEIGHT (e.g., 85% of usable space) 
+        MAX_HEIGHT_INCHES = usable_height_inches * 0.85 
+        
+        # --- 2. Replacement Loop ---
+        
+        paragraphs_to_check = list(self.doc.paragraphs)
+        
+        for paragraph in paragraphs_to_check:
+            for placeholder, filename in uploaded_images.items():
+                tag = f"[[{placeholder}]]"
+                
+                if tag in paragraph.text:
+                    try:
+                        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        
+                        # Use PIL to get the aspect ratio
+                        img = Image.open(image_path)
+                        img_width, img_height = img.size
+                        aspect_ratio = img_width / img_height
+                        
+                        # Set a max width that respects document margins (e.g., 6.0 inches)
+                        MAX_WIDTH_INCHES = 6.0
+                        
+                        # Determine final size, prioritizing fitting the page height
+                        final_height_inches = MAX_HEIGHT_INCHES
+                        final_width_inches = MAX_HEIGHT_INCHES * aspect_ratio
+                        
+                        # If the calculated width exceeds the page width, scale it back down
+                        if final_width_inches > MAX_WIDTH_INCHES:
+                             final_width_inches = MAX_WIDTH_INCHES
+                             final_height_inches = MAX_WIDTH_INCHES / aspect_ratio
+
+
+                        # 3. Insert new paragraph and content
+                        parent = paragraph._element.getparent()
+                        new_p_element = paragraph._element.makeelement(qn('w:p'))
+                        parent.insert(parent.index(paragraph._element) + 1, new_p_element)
+                        
+                        new_paragraph = Paragraph(new_p_element, self.doc)
+                        
+                        # Aggressive Style and Spacing Reset
+                        new_paragraph.style = 'Normal' 
+                        new_paragraph.paragraph_format.space_before = 0
+                        new_paragraph.paragraph_format.space_after = 0
+                            
+                        # Insert the image using calculated dimensions
+                        run = new_paragraph.add_run()
+                        run.add_picture(image_path, width=Inches(final_width_inches), height=Inches(final_height_inches))
+                        new_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        
+                        # Remove the original placeholder paragraph
+                        paragraph._element.getparent().remove(paragraph._element)
+                        
+                        self.replacements += 1
+                        log_entry = f"IMAGE in {placeholder}: '{tag}' replaced with '{filename}' (Sized: {final_width_inches:.2f}x{final_height_inches:.2f} in)"
+                        self.changes_log.append(log_entry)
+                        
+                    except Exception as e:
+                        error_message = f"ERROR: Image replacement failed for {placeholder}. Details: {e}"
+                        self.changes_log.append(error_message)
+                        print(error_message)
+
+    def _smart_replace_with_formatting(self, paragraph, old_text, new_text, location, field_type):
+        original_text = paragraph.text
+        if not original_text or old_text.lower() not in original_text.lower():
+            return
+        
+        original_runs = []
+        for run in paragraph.runs:
+            original_runs.append({
+                'text': run.text, 'font_name': run.font.name, 'font_size': run.font.size,
+                'bold': run.bold, 'italic': run.italic, 'underline': run.underline,
+                'color': run.font.color.rgb if run.font.color else None, 'all_caps': run.font.all_caps
+            })
+        
+        paragraph.clear()
+        
+        pattern = re.compile(f'({re.escape(old_text)})', re.IGNORECASE)
+        parts = pattern.split(original_text)
+        
+        current_pos = 0
+        for part in parts:
+            if not part: continue
+            if part.lower() == old_text.lower():
+                formatting = self._get_formatting_at_position(original_runs, current_pos)
+                run = paragraph.add_run(new_text)
+                self._apply_formatting(run, formatting)
+                self.replacements += 1
+                log_entry = f"{field_type.upper()} in {location}: '{part}' → '{new_text}'"
+                self.changes_log.append(log_entry)
+            else:
+                self._add_text_with_original_formatting(paragraph, part, original_runs, current_pos)
+            current_pos += len(part)
+    
+    def _get_formatting_at_position(self, runs_data, position):
+        current_pos = 0
+        for run_data in runs_data:
+            run_length = len(run_data['text'])
+            if position < current_pos + run_length:
+                return {
+                    'font_name': run_data['font_name'], 'font_size': run_data['font_size'],
+                    'bold': run_data['bold'], 'italic': run_data['italic'], 'underline': run_data['underline'],
+                    'color': run_data['color'], 'all_caps': run_data['all_caps']
+                }
+            current_pos += run_length
+        return None
+    
+    def _add_text_with_original_formatting(self, paragraph, text, runs_data, start_pos):
+        for i, char in enumerate(text):
+            pos = start_pos + i
+            formatting = self._get_formatting_at_position(runs_data, pos)
+            run = paragraph.add_run(char)
+            self._apply_formatting(run, formatting)
+    
+    def _apply_formatting(self, run, formatting):
+        if formatting:
+            if formatting['font_name']:
+                run.font.name = formatting['font_name']
+                run._element.rPr.rFonts.set(qn('w:eastAsia'), formatting['font_name'])
+            if formatting['font_size']:
+                run.font.size = formatting['font_size']
+            if formatting['bold'] is not None:
+                run.bold = formatting['bold']
+            if formatting['italic'] is not None:
+                run.italic = formatting['italic']
+            if formatting['underline'] is not None:
+                run.underline = formatting['underline']
+            if formatting['color']:
+                run.font.color.rgb = formatting['color']
+            if formatting['all_caps'] is not None:
+                run.font.all_caps = formatting['all_caps']
+
+# --- Your existing SmartProjectBookEditor class ---
+class SmartProjectBookEditor:
+    def __init__(self, doc_path):
+        self.doc_path = doc_path
+
+    def complete_update(self, updates_dict, uploaded_images):
+        editor = ProjectDocumentEditor(self.doc_path)
+        
+        old_data = {}
+        new_data = {}
+        
+        for field in ['name', 'project', 'professor', 'guide', 'year']:
+            if f'old_{field}' in updates_dict and f'new_{field}' in updates_dict:
+                old_data[field] = updates_dict[f'old_{field}']
+                new_data[field] = updates_dict[f'new_{field}']
+
+        return editor.replace_project_details(old_data, new_data, uploaded_images)
+
+    def get_preview_text(self, updates_dict):
+        editor = ProjectDocumentEditor(self.doc_path)
+        
+        old_data = {}
+        new_data = {}
+        
+        for field in ['name', 'project', 'professor', 'guide', 'year']:
+            if f'old_{field}' in updates_dict and f'new_{field}' in updates_dict:
+                old_data[field] = updates_dict[f'old_{field}']
+                new_data[field] = updates_dict[f'new_{field}']
+
+        return editor.get_document_as_text(old_data, new_data)
+
+# Hardcoded old details for the template
+HARDCODED_OLD_DETAILS = {
+    'student_name': 'Param Sachin Shinde',
+    'project_title': 'Face Recognition Attendance',
+    'professor_name': 'Srimathi Narayanan',
+    'guide_name': 'Swetha Iyer',
+    'year': '2024-2025'
+}
+
+app = Flask(__name__)
+
+# Create an uploads folder if it doesn't exist
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        pass
+
+    current_year = datetime.datetime.now().year
+    next_year = current_year + 1
+    default_new_year = f"{current_year}-{next_year}"
+
+    return render_template(
+        'index.html',
+        old_details=HARDCODED_OLD_DETAILS,
+        default_year=default_new_year
+    )
+
+@app.route('/preview', methods=['POST'])
+def preview():
+    new_student_name = request.json.get('student_name')
+    new_project_title = request.json.get('project_title')
+    new_professor_name = request.json.get('professor_name')
+    new_guide_name = request.json.get('guide_name')
+    new_year = request.json.get('year')
+    
+    updates = {
+        'old_name': HARDCODED_OLD_DETAILS['student_name'],
+        'new_name': new_student_name or HARDCODED_OLD_DETAILS['student_name'],
+        'old_project': HARDCODED_OLD_DETAILS['project_title'],
+        'new_project': new_project_title or HARDCODED_OLD_DETAILS['project_title'],
+        'old_professor': HARDCODED_OLD_DETAILS['professor_name'],
+        'new_professor': new_professor_name or HARDCODED_OLD_DETAILS['professor_name'],
+        'old_guide': HARDCODED_OLD_DETAILS['guide_name'],
+        'new_guide': new_guide_name or HARDCODED_OLD_DETAILS['guide_name'],
+        'old_year': HARDCODED_OLD_DETAILS['year'],
+        'new_year': new_year or HARDCODED_OLD_DETAILS['year']
+    }
+    
+    doc_path = os.path.join(os.getcwd(), 'ankit.docx')
+    if not os.path.exists(doc_path):
+        return jsonify({"error": "'ankit.docx' not found."}), 404
+
+    editor = SmartProjectBookEditor(doc_path)
+    updated_text = editor.get_preview_text(updates)
+
+    preview_html = updated_text.replace('\n', '<br>')
+
+    return jsonify({"html": preview_html})
+
+@app.route('/upload_and_update', methods=['POST'])
+def upload_and_update():
+    # 1. Handle file uploads first
+    uploaded_files = {}
+    image_types = [
+        'plagarism_report', 'er_diagram', 'class_diagram', 'activity_diagram', 
+        'usecase_diagram', 'sequence_diagram', 'component_diagram', 'deployment_diagram', 'database_model'
+    ]
+    
+    for img_type in image_types:
+        if img_type in request.files:
+            file = request.files[img_type]
+            if file and file.filename != '':
+                filename = f"{int(time.time())}_{file.filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                uploaded_files[img_type] = filename
+
+    # 2. Extract text data
+    new_student_name = request.form.get('student_name')
+    new_project_title = request.form.get('project_title')
+    new_professor_name = request.form.get('professor_name')
+    new_guide_name = request.form.get('guide_name')
+    new_year = request.form.get('year')
+
+    # 3. Prepare data for document processing
+    updates = {
+        'old_name': HARDCODED_OLD_DETAILS['student_name'],
+        'new_name': new_student_name,
+        'old_project': HARDCODED_OLD_DETAILS['project_title'],
+        'new_project': new_project_title,
+        'old_professor': HARDCODED_OLD_DETAILS['professor_name'],
+        'new_professor': new_professor_name,
+        'old_guide': HARDCODED_OLD_DETAILS['guide_name'],
+        'new_guide': new_guide_name,
+        'old_year': HARDCODED_OLD_DETAILS['year'],
+        'new_year': new_year
+    }
+    
+    final_updates = {}
+    for key, value in updates.items():
+        if key.startswith('old_') and value:
+            new_key = 'new_' + key[4:]
+            if updates.get(new_key) and updates.get(new_key) != value:
+                final_updates[key] = value
+                final_updates[new_key] = updates[new_key]
+
+    # 4. Process the document
+    doc_path = os.path.join(os.getcwd(), 'ankit.docx')
+    if not os.path.exists(doc_path):
+        return "Error: 'ankit.docx' not found.", 404
+
+    editor = SmartProjectBookEditor(doc_path)
+    replacements, changes_log, output_path = editor.complete_update(final_updates, uploaded_files)
+    
+    # Return a JSON response
+    return jsonify({
+        "status": "success",
+        "replacements": replacements,
+        "changes_log": changes_log,
+        "output_path": output_path
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Ankit Project Template (ankit.docx)",
+        "file": "ankit.docx",
+        "old_details": {
+            "student_name": "Param Sachin Shinde",
+            "project_title": "Face Recognition Attendance",
+            "professor_name": "Srimathi Narayanan",
+            "guide_name": "Swetha Iyer",
+            "year": "2024-2025",
+            
+            "doc_introduction": "[[doc_introduction]]",
+            "doc_objective": "[[doc_objective]]",
+            "doc_scope": "[[doc_scope]]",
+            "doc_techstack": "[[doc_techstack]]",
+            "doc_feasibility": "[[doc_feasibility]]",
+            "doc_system_features": "[[doc_system_features]]",
+            "doc_modules": "[[doc_modules]]",
+            "doc_usecase": "[[doc_usecase]]",
+            "doc_advantage": "[[doc_advantage]]",
+            "doc_hardware_req": "[[doc_hardware_req]]",
+            "doc_software_req": "[[doc_software_req]]",
+            "code_list": "[[CODE_IMPLEMENTATION_BLOCK]]"
+        }
+    },
+    {
+        "name": "Standard Project Book (proj.docx)",
+        "file": "proj.docx",
+        "old_details": {
+            "student_name": "Rahul Kumar Singh",
+            "project_title": "Smart Attendance System",
+            "professor_name": "Dr. Vimal Sharma",
+            "guide_name": "Pooja Desai",
+            "year": "2023-2024",
+            
+            "doc_introduction": "[[doc_introduction]]",
+            "doc_objective": "[[doc_objective]]",
+            "doc_scope": "[[doc_scope]]",
+            "doc_techstack": "[[doc_techstack]]",
+            "doc_feasibility": "[[doc_feasibility]]",
+            "doc_system_features": "[[doc_system_features]]",
+            "doc_modules": "[[doc_modules]]",
+            "doc_usecase": "[[doc_usecase]]",
+            "doc_advantage": "[[doc_advantage]]",
+            "doc_hardware_req": "[[doc_hardware_req]]",
+            "doc_software_req": "[[doc_software_req]]",
+            "code_list": "[[CODE_IMPLEMENTATION_BLOCK]]"
+        }
+    }
+]
