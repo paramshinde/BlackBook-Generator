@@ -99,7 +99,7 @@ def get_ai_generated_documentation(project_title):
 
     # 2. Use updated model name + JSON output config
     model = genai.GenerativeModel(
-    'gemini-2.5-pro',  # <-- Use this one
+    'gemini-2.0-flash',  # <-- Use this one
     generation_config={"response_mime_type": "application/json"}
 )
 
@@ -107,15 +107,32 @@ def get_ai_generated_documentation(project_title):
     json_keys = DOCUMENTATION_TAGS 
 
     system_prompt = f"""
-    You are an expert technical writer for student software projects.
-    You will be given a project title.
-    Your task is to generate documentation for this project.
-    You MUST return a single JSON object.
-    The keys in the JSON object MUST be exactly: {json_keys}
-    The value for each key should be a string containing the generated content for that section,
-    formatted with newlines (\n) where appropriate.
-    Do not include any other text, just the JSON object.
-    """
+You are an expert technical writer for student software projects.
+You will be given a project title.
+
+Your task is to generate complete project documentation in a SINGLE JSON object.
+
+The JSON object MUST contain EXACTLY these keys: {json_keys}
+
+The value for each key must be a string containing well-written, structured content for that section.
+Each section MUST follow the minimum word counts below:
+
+- introduction: at least **180 words**
+- objective: at least **130 words**
+- scope: at least **180 words**
+- technology_stack: at least **140 words**
+- feasibility_study: at least **250 words**
+- system_features: at least **150 words**
+- modules: at least **300 words**
+- usecase: at least **120 words**
+- advantages: at least **250 words**
+- hardware_and_software_requirement: at least **250 words**
+
+Guidelines:
+- Format content with newline characters (\\n) where appropriate.
+- The output MUST be only the JSON object, with no extra text, explanation, or commentary outside it.
+"""
+
 
     user_prompt = f"Project Title: {project_title}"
     full_prompt = f"{system_prompt}\n\n{user_prompt}"
