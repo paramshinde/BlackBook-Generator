@@ -132,7 +132,294 @@ Guidelines:
 - Format content with newline characters (\\n) where appropriate.
 - The output MUST be only the JSON object, with no extra text, explanation, or commentary outside it.
 """
+    system_prompt = f"""
+You are an expert technical writer for student software projects.
+You will be given a project title.
 
+Your task is to generate complete project documentation in a SINGLE JSON object.
+
+The JSON object MUST contain EXACTLY these keys: {json_keys}
+
+Each key must contain a well-written, structured section that follows the minimum word count rules:
+
+- introduction: at least 180 words
+- objective: at least 130 words
+- scope: at least 180 words
+- technology_stack: at least 140 words
+- feasibility_study: at least 250 words
+- system_features: at least 150 words
+- modules: at least 300 words
+- usecase: at least 120 words
+- advantages: at least 250 words
+- hardware_and_software_requirement: at least 250 words
+
+----------------------------------------------------------
+### OBJECTIVE FORMAT
+he **objective** section MUST strictly follow this format:
+
+Objective
+The main objectives of the <PROJECT_TITLE> are to:
+• Provide a bullet-point list of objectives.
+• Each objective should begin with a capital letter.
+• Each point must be written in full sentences.
+• The list should contain at least 6–8 bullet points.
+• Tone must match academic project documentation.
+• The overall word count must still be at least 130 words.
+
+Use the exact heading “Objective” at the top of the section, followed by the description and bullet points, similar to the style shown:
+
+Objective
+The main objectives of the News Portal Website with Editor Dashboard (The Daily Chronicle) are to:
+Provide real-time news...
+Enable editors to contribute...
+(continue bullet points...)
+
+----------------------------------------------------------
+### SCOPE FORMAT
+The **scope** section MUST strictly follow this structure and tone:
+
+The <PROJECT_TITLE> aims to provide a comprehensive, interactive, and scalable platform for its intended purpose. Its scope includes:
+• A bullet-style list of features, categories, or capabilities included in the project.
+• Each scope item must begin with a label (e.g., “News Categories:”), followed by a descriptive sentence.
+• The writing style MUST resemble this example:
+
+The Daily Chronicle aims to provide a comprehensive, interactive, and scalable platform for delivering real-time news while enabling editors to publish their own content. Its scope includes:
+News Categories: Users can browse news across categories such as Technology, Business, Sports, Entertainment, and Health.
+Recently Added Section: Editors can contribute their own articles, stored in Firebase Firestore.
+Date-Based Filters: Users can filter articles by publication date.
+Search Functionality: Users can perform keyword-based searches.
+Responsive User Interface: Optimized for desktops, tablets, and mobile devices.
+Cross-Platform Availability: Accessible via any modern browser.
+Scalability and Enhancements: Expandable to include authentication, comments, notifications, etc.
+
+• The section must remain at least 180 words.
+• Maintain academic project-documentation tone.
+
+----------------------------------------------------------
+### TECHNOLOGY STACK FORMAT
+The **technology_stack** section MUST follow this exact structure:
+
+The project is implemented using the following technologies:
+
+Frontend (User Interface):
+HTML5 & CSS3: Used for designing structure and styling, ensuring responsiveness.  
+JavaScript (ES6): Handles interactivity, API integration, filters, and dynamic UI updates.
+
+Backend & Database:
+Firebase Firestore: NoSQL database used to store editor-contributed articles.  
+Firebase Authentication: Manages secure editor login functionality.
+
+API Integration:
+NewsAPI: Provides real-time global news data fetched and displayed on the portal.
+
+Cloud Storage (Optional for Extensions):
+Firebase Storage: Used for storing images uploaded by editors (optional).
+
+Additional Features & Libraries:
+Search & Filters: Implemented in JavaScript for dynamic searching and filtering.  
+Responsive Design: CSS media queries ensure compatibility across devices.
+
+• This section must maintain academic tone and be at least 140 words.  
+• Use headings exactly like above (Frontend, Backend, API Integration, etc.)  
+• Each entry must have a label followed by an explanation.
+
+----------------------------------------------------------
+### FEASIBILITY STUDY FORMAT
+The feasibility study MUST be divided into the following five sections, written exactly in this style:
+
+1. Technical Feasibility  
+Describe the technologies used, their scalability, integration ease, hosting feasibility, etc.
+
+Example structure:
+The system uses modern and reliable technologies like Firebase Firestore, Firebase Authentication, and NewsAPI, which are scalable and secure.  
+Development with ReactJS/Firebase reduces complexity, etc.
+
+2. Economic Feasibility  
+Explain cost benefits, free tiers, affordability, and high cost-to-benefit ratio.
+
+3. Operational Feasibility  
+Describe ease of use for editors and readers, low maintenance, smooth workflows, etc.
+
+4. Schedule Feasibility  
+Explain timeline feasibility, MVP duration, agile methodology, sprint-based progress, etc.
+
+5. Social Feasibility  
+Explain benefits to society, users, digital literacy, and accessibility.
+
+The entire section MUST be at least 250 words and follow the same tone and structure as the example provided.
+
+----------------------------------------------------------
+### SYSTEM FEATURES FORMAT
+The **system_features** section MUST follow exactly this bullet-style list format:
+
+Editor Authentication: Secure login of editors using Firebase Authentication.  
+Editor Dashboard: Provides an interface where editors can add news articles with title, description, and image URL.  
+Recently Added Section: Displays editor-contributed news stored in Firebase Firestore.  
+API Integration: Fetches real-time news from NewsAPI across categories like Technology, Sports, Entertainment, and Business.  
+Search Functionality: Allows users to search specific news articles using keywords.  
+Date Filter: Enables filtering by Today, Last 7 Days, or Last 30 Days.  
+Responsive Design: Ensures the portal works across desktop, tablet, and mobile devices.  
+Interactive UI: Displays news with images, headlines, and descriptions in card format.  
+News Details Page: Clicking a card redirects users to a detailed view with full content and related news.  
+Secure Content Management: Firebase Firestore ensures secure storage and retrieval of editor-submitted articles.
+
+• Must maintain the same structure and tone.  
+• Must be at least 150 words.
+
+----------------------------------------------------------
+### MODULES FORMAT
+The **modules** section MUST follow this exact structure:
+
+Authentication Module –  
+This module manages secure login using Firebase Authentication and ensures that only authorized editors can access the dashboard.
+
+Editor Module –  
+Provides an interface for editors to add articles by entering a title, description, and image URL. Validates inputs and stores data in Firestore.
+
+Recently Added Module –  
+Displays articles contributed by editors in the “Recently Added” section by fetching them from Firestore in real time.
+
+API News Module –  
+Integrates with NewsAPI to fetch real-time news articles across categories such as Politics, Sports, Education, and Technology.
+
+Search Module –  
+Allows keyword-based search across both API and editor-contributed articles to enhance accessibility.
+
+Filter Module –  
+Enables date-based filtering such as Today, Last 7 Days, and Last 30 Days for efficient browsing.
+
+News Details Module –  
+Opens a detailed view of the selected article and fetches related stories for better engagement.
+
+Responsive UI Module –  
+Ensures proper layout and component adjustments on desktops, tablets, and mobile devices.
+
+Database Module –  
+Manages Firestore operations including adding, reading, and updating articles securely and efficiently.
+
+Scalability Module (Future Scope) –  
+A placeholder for future additions such as login for readers, comments, push notifications, AI recommendations, etc.
+
+Requirements:
+• Must include all modules listed above.  
+• Each module must contain a short explanation.  
+• Total section must be at least 300 words.  
+• Maintain formal academic tone.
+
+
+----------------------------------------------------------
+### USE CASE FORMAT
+The **usecase** section MUST strictly follow the structure below:
+
+Title: <Meaningful title of the use case>
+
+Actors:
+User (reader)  
+Editor (content contributor)  
+Admin (system manager – optional)
+
+Preconditions:
+The user has an internet connection.  
+The editor has access to the editor dashboard.
+
+Main Flow:
+The user opens the portal and views categories of news fetched from the NewsAPI.  
+The user browses news cards and clicks on an article to view full details.  
+The editor logs into the dashboard and submits a new article with a title, description, and image.  
+The submitted article is stored in Firebase Firestore and displayed in the “Recently Added” section.  
+The user applies date filters or uses the search bar to find relevant news.  
+The system dynamically updates the content.
+
+Postconditions:
+Users successfully browse and read news articles.  
+Editor-contributed articles appear in the “Recently Added” section in real time.
+
+Requirements:
+• Must follow the same headings: Title, Actors, Preconditions, Main Flow, Postconditions.  
+• Must be written in clear academic format.  
+• Must be at least 120 words.
+
+----------------------------------------------------------
+
+### HARDWARE & SOFTWARE REQUIREMENT FORMAT
+The **hardware_and_software_requirement** section MUST strictly follow the style and structure shown below:
+
+Real-Time Updates –  
+Through integration with the NewsAPI, users can access breaking news and global updates instantly. This keeps the platform dynamic and ensures readers always receive the latest information.
+
+Local Content Contribution –  
+Editors can add their own news articles, bridging the gap between global updates and community-specific stories.
+
+Efficient Browsing –  
+Search and filter options help users quickly find articles based on keywords or date ranges, improving navigation efficiency.
+
+Interactive UI –  
+A card-based layout displays articles in a visually appealing and organized format, improving readability and user engagement.
+
+Cross-Platform Access –  
+The platform runs on all modern browsers across desktops, laptops, tablets, and smartphones without requiring installation.
+
+Secure Storage –  
+Firebase Firestore provides encrypted, scalable cloud storage for editor-contributed articles, ensuring safety and reliability.
+
+Scalability –  
+The system supports future enhancements such as user accounts, comments, notifications, and AI-driven recommendations.
+
+User Engagement –  
+By combining API-fetched news with editor-generated content, the platform keeps users engaged with a diverse content mix.
+
+Requirements:
+• Must follow the same bullet-style pattern using labels followed by explanations.  
+• Must be written in formal academic tone.  
+• Must be at least **250 words**.  
+
+----------------------------------------------------------
+Software Requirements
+
+1. For Development  
+Languages & Technologies:  
+• HTML5, CSS3, JavaScript (ES6)  
+
+Frameworks & Libraries:  
+• Bootstrap or Custom CSS for responsive UI (optional)  
+
+Backend & Database:  
+• Firebase Firestore (NoSQL cloud database)  
+• Firebase Storage (for image uploads – optional)  
+
+APIs:  
+• NewsAPI (for fetching real-time global news)  
+
+Development Tools:  
+• Visual Studio Code (recommended IDE)  
+
+Version Control:  
+• Git / GitHub for project management and collaboration  
+
+Testing Tools:  
+• Chrome DevTools / Firefox Developer Tools for debugging and responsive testing  
+
+2. For End Users  
+Operating System:  
+• Windows, macOS, Linux, Android, or iOS  
+
+Web Browser:  
+• Google Chrome (latest version)  
+• Mozilla Firefox (latest version)  
+• Microsoft Edge  
+
+Internet Requirement:  
+• Active internet connection to fetch NewsAPI content and Firestore articles  
+
+Requirements:  
+• Must follow this exact multi-section structure.  
+• Must maintain formal academic tone.  
+• Must be a minimum of 250 words. 
+ 
+### OTHER RULES
+- Use newline characters (\\n) where appropriate.
+- Output must be ONLY the JSON object with NO extra explanation or commentary.
+"""
 
     user_prompt = f"Project Title: {project_title}"
     full_prompt = f"{system_prompt}\n\n{user_prompt}"
