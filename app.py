@@ -106,32 +106,7 @@ def get_ai_generated_documentation(project_title):
     # 3. Create the prompt
     json_keys = DOCUMENTATION_TAGS 
 
-    system_prompt = f"""
-You are an expert technical writer for student software projects.
-You will be given a project title.
-
-Your task is to generate complete project documentation in a SINGLE JSON object.
-
-The JSON object MUST contain EXACTLY these keys: {json_keys}
-
-The value for each key must be a string containing well-written, structured content for that section.
-Each section MUST follow the minimum word counts below:
-
-- introduction: at least **180 words**
-- objective: at least **130 words**
-- scope: at least **180 words**
-- technology_stack: at least **140 words**
-- feasibility_study: at least **250 words**
-- system_features: at least **150 words**
-- modules: at least **300 words**
-- usecase: at least **120 words**
-- advantages: at least **250 words**
-- hardware_and_software_requirement: at least **250 words**
-
-Guidelines:
-- Format content with newline characters (\\n) where appropriate.
-- The output MUST be only the JSON object, with no extra text, explanation, or commentary outside it.
-"""
+    
     system_prompt = f"""
 You are an expert technical writer for student software projects.
 You will be given a project title.
@@ -162,7 +137,7 @@ The main objectives of the <PROJECT_TITLE> are to:
 • Provide a bullet-point list of objectives.
 • Each objective should begin with a capital letter.
 • Each point must be written in full sentences.
-• The list should contain at least 6–8 bullet points.
+• The list should contain at least 6-8 bullet points.
 • Tone must match academic project documentation.
 • The overall word count must still be at least 130 words.
 
@@ -270,34 +245,34 @@ Secure Content Management: Firebase Firestore ensures secure storage and retriev
 ### MODULES FORMAT
 The **modules** section MUST follow this exact structure:
 
-Authentication Module –  
+Authentication Module -  
 This module manages secure login using Firebase Authentication and ensures that only authorized editors can access the dashboard.
 
-Editor Module –  
+Editor Module -  
 Provides an interface for editors to add articles by entering a title, description, and image URL. Validates inputs and stores data in Firestore.
 
-Recently Added Module –  
+Recently Added Module -  
 Displays articles contributed by editors in the “Recently Added” section by fetching them from Firestore in real time.
 
-API News Module –  
+API News Module -  
 Integrates with NewsAPI to fetch real-time news articles across categories such as Politics, Sports, Education, and Technology.
 
-Search Module –  
+Search Module -  
 Allows keyword-based search across both API and editor-contributed articles to enhance accessibility.
 
-Filter Module –  
+Filter Module -  
 Enables date-based filtering such as Today, Last 7 Days, and Last 30 Days for efficient browsing.
 
-News Details Module –  
+News Details Module -  
 Opens a detailed view of the selected article and fetches related stories for better engagement.
 
-Responsive UI Module –  
+Responsive UI Module -  
 Ensures proper layout and component adjustments on desktops, tablets, and mobile devices.
 
-Database Module –  
+Database Module -  
 Manages Firestore operations including adding, reading, and updating articles securely and efficiently.
 
-Scalability Module (Future Scope) –  
+Scalability Module (Future Scope) -  
 A placeholder for future additions such as login for readers, comments, push notifications, AI recommendations, etc.
 
 Requirements:
@@ -316,7 +291,7 @@ Title: <Meaningful title of the use case>
 Actors:
 User (reader)  
 Editor (content contributor)  
-Admin (system manager – optional)
+Admin (system manager - optional)
 
 Preconditions:
 The user has an internet connection.  
@@ -340,81 +315,89 @@ Requirements:
 • Must be at least 120 words.
 
 ----------------------------------------------------------
+### HARDWARE REQUIREMENTS FORMAT
+The hardware requirements section MUST strictly follow the structure and tone shown below.  
+It must include hardware requirements for BOTH developers and end users in a clear academic format.  
+Total word count (combined with software requirements) must be at least 250 words.
 
-### HARDWARE & SOFTWARE REQUIREMENT FORMAT
-The **hardware_and_software_requirement** section MUST strictly follow the style and structure shown below:
+----------------------------------------------------------
+Hardware Requirements
 
-Real-Time Updates –  
-Through integration with the NewsAPI, users can access breaking news and global updates instantly. This keeps the platform dynamic and ensures readers always receive the latest information.
+1. For Development  
+Processor: Intel Core i5 or higher (or equivalent AMD processor)  
+RAM: Minimum 8 GB (16 GB recommended for efficient development and multitasking)  
+Storage: At least 10 GB of free space for project files, dependencies, SDKs, and build tools  
+Operating System:  
+• Windows 10 or higher  
+• macOS 10.14 (Mojave) or higher  
+Screen Resolution: 1366 × 768 or higher (1920 × 1080 recommended for better workspace visibility)  
+Internet Connection: Stable broadband connection for NewsAPI usage, package installation, and Firebase integration  
 
-Local Content Contribution –  
-Editors can add their own news articles, bridging the gap between global updates and community-specific stories.
+2. For Users (End Users of the Website)  
+Device: Desktop, Laptop, Tablet, or Smartphone capable of running a modern web browser  
+Processor: Minimum dual-core processor (quad-core recommended for smooth performance)  
+RAM: At least 4 GB for comfortable browsing  
+Operating System:  
+• Windows 8/10/11  
+• macOS 10.14 or higher  
+• Linux distributions  
+• Android 7.0+ or iOS 12+ (for mobile access)  
+Internet Connection: Required for retrieving real-time API-based news and loading editor-submitted content from Firestore  
 
-Efficient Browsing –  
-Search and filter options help users quickly find articles based on keywords or date ranges, improving navigation efficiency.
-
-Interactive UI –  
-A card-based layout displays articles in a visually appealing and organized format, improving readability and user engagement.
-
-Cross-Platform Access –  
-The platform runs on all modern browsers across desktops, laptops, tablets, and smartphones without requiring installation.
-
-Secure Storage –  
-Firebase Firestore provides encrypted, scalable cloud storage for editor-contributed articles, ensuring safety and reliability.
-
-Scalability –  
-The system supports future enhancements such as user accounts, comments, notifications, and AI-driven recommendations.
-
-User Engagement –  
-By combining API-fetched news with editor-generated content, the platform keeps users engaged with a diverse content mix.
-
-Requirements:
-• Must follow the same bullet-style pattern using labels followed by explanations.  
+Requirements:  
+• Must follow this exact hierarchical structure (1. For Development → hardware list → OS list → resolution → connection → 2. For Users → hardware list → OS list → connection).  
 • Must be written in formal academic tone.  
-• Must be at least **250 words**.  
+• Must integrate smoothly with the Software Requirements section that follows.
+
+### SOFTWARE REQUIREMENTS FORMAT
+The software requirements section MUST strictly follow the structure and tone shown below.  
+It must include software requirements for BOTH developers and end users in a clear academic format.  
+Total must be at least **250 words** when combined with hardware requirements.
 
 ----------------------------------------------------------
 Software Requirements
 
 1. For Development  
 Languages & Technologies:  
-• HTML5, CSS3, JavaScript (ES6)  
+• HTML5, CSS3, JavaScript (ES6)
 
 Frameworks & Libraries:  
-• Bootstrap or Custom CSS for responsive UI (optional)  
+• Bootstrap or Custom CSS for responsive design (optional)
 
 Backend & Database:  
 • Firebase Firestore (NoSQL cloud database)  
-• Firebase Storage (for image uploads – optional)  
+• Firebase Storage (optional – for storing uploaded images)
 
 APIs:  
-• NewsAPI (for fetching real-time global news)  
+• NewsAPI (used to fetch real-time global news)
 
 Development Tools:  
 • Visual Studio Code (recommended IDE)  
 
 Version Control:  
-• Git / GitHub for project management and collaboration  
+• Git / GitHub for collaboration and version tracking  
 
 Testing Tools:  
-• Chrome DevTools / Firefox Developer Tools for debugging and responsive testing  
+• Chrome DevTools / Firefox Developer Tools for debugging, performance checks, and responsive testing  
 
 2. For End Users  
 Operating System:  
 • Windows, macOS, Linux, Android, or iOS  
 
 Web Browser:  
-• Google Chrome (latest version)  
+• Google Chrome (latest recommended version)  
 • Mozilla Firefox (latest version)  
 • Microsoft Edge  
 
 Internet Requirement:  
-• Active internet connection to fetch NewsAPI content and Firestore articles  
+• Active and stable internet connection for fetching API-based news and loading Firestore content  
 
 Requirements:  
-• Must follow this exact multi-section structure.  
-• Must maintain formal academic tone.  
-• Must be a minimum of 250 words. 
+• Must follow this exact hierarchical structure (1. For Development → categories → bullet points → descriptions).  
+• Must maintain a formal academic tone.  
+• Combined with hardware requirements, total must be at least 250 words.
+
+ 
  
 ### OTHER RULES
 - Use newline characters (\\n) where appropriate.
