@@ -8,7 +8,7 @@ from io import BytesIO
 from dotenv import load_dotenv
 
 # Third-party libraries
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, send_file
 from docx import Document
 from docx.oxml.ns import qn
 from docx.shared import Inches, Length, Pt
@@ -99,7 +99,7 @@ def get_ai_generated_documentation(project_title):
 
     # 2. Use updated model name + JSON output config
     model = genai.GenerativeModel(
-    'gemini-2.0-flash',  # <-- Use this one
+    'gemini-2.5-flash-lite',  # <-- Use this one
     generation_config={"response_mime_type": "application/json"}
 )
 
@@ -984,13 +984,16 @@ def upload_and_update():
         uploaded_files,
         screenshot_metadata=screenshot_metadata
     )
-
-    return jsonify({
-        "status": "success",
-        "replacements": replacements,
-        "changes_log": changes_log,
-        "output_path": output_path
-    })
+    try:
+        return send_file(
+            output_path,
+            as_attachment=True,
+            download_name=os.path.basename(output_path),
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+    except Exception as e:
+        return str(e)
+    
 @app.route('/generate_project_content', methods=['POST'])
 def generate_project_content():
     """
