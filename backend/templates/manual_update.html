@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Update - Project Document Editor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✏️ Manual Document Update</h1>
+            <a href="{{ url_for('index') }}" class="btn btn-back">← Back to Home</a>
+        </header>
+
+        <form action="{{ url_for('manual_update') }}" method="post" enctype="multipart/form-data" class="manual-form">
+            <div class="form-group">
+                <label for="file">Upload Project Document (.docx):</label>
+                <input type="file" name="file" accept=".docx" required>
+            </div>
+
+            <div class="update-sections">
+                <div class="update-section">
+                    <h3>Student Name</h3>
+                    <div class="form-row">
+                        <input type="text" name="old_student_name" placeholder="Current student name">
+                        <span class="arrow">→</span>
+                        <input type="text" name="new_student_name" placeholder="New student name">
+                    </div>
+                </div>
+
+                <div class="update-section">
+                    <h3>Project Name</h3>
+                    <div class="form-row">
+                        <input type="text" name="old_project_name" placeholder="Current project name">
+                        <span class="arrow">→</span>
+                        <input type="text" name="new_project_name" placeholder="New project name">
+                    </div>
+                </div>
+
+                <div class="update-section">
+                    <h3>Professor Name</h3>
+                    <div class="form-row">
+                        <input type="text" name="old_professor_name" placeholder="Current professor name">
+                        <span class="arrow">→</span>
+                        <input type="text" name="new_professor_name" placeholder="New professor name">
+                    </div>
+                </div>
+
+                <div class="update-section">
+                    <h3>Guide Name</h3>
+                    <div class="form-row">
+                        <input type="text" name="old_guide_name" placeholder="Current guide name">
+                        <span class="arrow">→</span>
+                        <input type="text" name="new_guide_name" placeholder="New guide name">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-note">
+                <p>💡 <strong>Note:</strong> Only fill in the fields you want to update. Leave fields blank if you don't want to change them.</p>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update Document</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
