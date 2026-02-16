@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #101623;
+  background: #edf2f8;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", system-ui, sans-serif;
+}
