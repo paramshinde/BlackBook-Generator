@@ -3,10 +3,15 @@ flask-cors==5.0.0
 Flask-JWT-Extended==4.7.1
 Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.1.1
+bleach==6.2.0
 gunicorn==23.0.0
+marshmallow==3.23.2
 python-docx==1.2.0
 pillow==11.2.1
 google-generativeai==0.8.5
 python-dotenv==1.1.1
 pymupdf==1.24.10
+redis==5.2.1
 requests==2.32.3
+rq==1.16.2
+marshmallow
