@@ -61,3 +61,7 @@ def create_app(config_class=Config):
         return jsonify({"status": "ok"})
 
     return app
+
+
+# Compatibility for process managers configured as "gunicorn app:app".
+app = create_app()
