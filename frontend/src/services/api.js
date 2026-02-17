@@ -1,6 +1,7 @@
 import axios from "axios";
+import { toApiUrl } from "./apiBase";
 
-const api = axios.create({ baseURL: "/api" });
+const api = axios.create({ baseURL: toApiUrl("/api") });
 
 function parseAxiosError(error, fallback = "Request failed") {
   const payload = error?.response?.data || {};

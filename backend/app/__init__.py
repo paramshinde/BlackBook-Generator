@@ -1,4 +1,6 @@
 import os
+import importlib.util
+from pathlib import Path
 
 from flask import Flask, jsonify
 
@@ -63,5 +65,19 @@ def create_app(config_class=Config):
     return app
 
 
+def _load_legacy_app():
+    """
+    Prefer the legacy Flask app in backend/app.py so existing frontend routes
+    (/api/*, /generate_diagrams, /uploads/*) continue to work.
+    """
+    app_py = Path(__file__).resolve().parent.parent / "app.py"
+    spec = importlib.util.spec_from_file_location("legacy_app_module", app_py)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load Flask app from {app_py}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.app
+
+
 # Compatibility for process managers configured as "gunicorn app:app".
-app = create_app()
+app = _load_legacy_app()

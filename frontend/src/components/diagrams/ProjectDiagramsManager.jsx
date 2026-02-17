@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { toApiUrl } from "../../services/apiBase";
 
 const DIAGRAM_TYPES = [
   { key: "event_table", label: "A. Event Table" },
@@ -73,7 +74,7 @@ export default function ProjectDiagramsManager({ projectTitle, diagrams, setDiag
     setMessage(diagramKey, "info", "Generating diagram...");
 
     try {
-      const response = await fetch("/generate_diagrams", {
+      const response = await fetch(toApiUrl("/generate_diagrams"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -88,7 +89,7 @@ export default function ProjectDiagramsManager({ projectTitle, diagrams, setDiag
       }
 
       const filename = payload.filename;
-      const fileResponse = await fetch(`/uploads/${encodeURIComponent(filename)}`);
+      const fileResponse = await fetch(toApiUrl(`/uploads/${encodeURIComponent(filename)}`));
       if (!fileResponse.ok) {
         throw new Error("Generated image could not be fetched.");
       }
@@ -102,7 +103,7 @@ export default function ProjectDiagramsManager({ projectTitle, diagrams, setDiag
         file,
         source: "ai",
         aiFilename: filename,
-        previewUrl: `/uploads/${encodeURIComponent(filename)}?t=${Date.now()}`,
+        previewUrl: toApiUrl(`/uploads/${encodeURIComponent(filename)}?t=${Date.now()}`),
       });
       setMessage(diagramKey, "success", "Diagram generated successfully.");
     } catch (error) {
